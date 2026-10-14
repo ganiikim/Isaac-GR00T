@@ -353,11 +353,13 @@ GPU                 : 1
 Max Steps           : 10000
 Global Batch Size   : 32
 Dataloader Workers  : 4
-W&B                 : OFF
+W&B                 : ON (project: rb5_grape_sort_v2)
 Save Steps          : 20000
 ```
 
 10,000 step 학습을 수행한다.
+
+W&B는 `USE_WANDB=1`로 활성화하고 `--wandb-project $DATASET_NAME`으로 프로젝트를 지정한다. 실행 전에 `uv run wandb login`으로 로그인되어 있어야 한다. 학습 중 Loss는 W&B 대시보드에서 확인할 수 있다.
 
 `SAVE_STEPS=20000`으로 설정하여 학습 도중 주기적인 checkpoint 저장은 발생하지 않도록 한다.
 
@@ -370,7 +372,7 @@ HF_HUB_ENABLE_HF_TRANSFER=0 \
 NUM_GPUS=1 \
 MAX_STEPS=10000 \
 SAVE_STEPS=20000 \
-USE_WANDB=0 \
+USE_WANDB=1 \
 GLOBAL_BATCH_SIZE=32 \
 DATALOADER_NUM_WORKERS=4 \
 uv run bash examples/finetune.sh \
@@ -379,7 +381,8 @@ uv run bash examples/finetune.sh \
   --modality-config-path examples/RB5_DG5F/rb5_dg5f_config.py \
   --embodiment-tag NEW_EMBODIMENT \
   --output-dir /workspace/checkpoints/${DATASET_NAME}_10k \
-  --experiment-name ${DATASET_NAME}_10k
+  --experiment-name ${DATASET_NAME}_10k \
+  --wandb-project $DATASET_NAME
 ```
 
 예를 들어:
@@ -768,7 +771,7 @@ HF_HUB_ENABLE_HF_TRANSFER=0 \
 NUM_GPUS=1 \
 MAX_STEPS=10000 \
 SAVE_STEPS=20000 \
-USE_WANDB=0 \
+USE_WANDB=1 \
 GLOBAL_BATCH_SIZE=32 \
 DATALOADER_NUM_WORKERS=4 \
 uv run bash examples/finetune.sh \
@@ -777,7 +780,8 @@ uv run bash examples/finetune.sh \
   --modality-config-path examples/RB5_DG5F/rb5_dg5f_config.py \
   --embodiment-tag NEW_EMBODIMENT \
   --output-dir /workspace/checkpoints/${DATASET_NAME}_10k \
-  --experiment-name ${DATASET_NAME}_10k
+  --experiment-name ${DATASET_NAME}_10k \
+  --wandb-project $DATASET_NAME
 ```
 
 ---

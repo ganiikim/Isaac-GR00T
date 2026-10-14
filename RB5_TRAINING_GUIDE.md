@@ -244,7 +244,7 @@ ls -lh /workspace/datasets/$DATASET_NAME/meta/relative_stats.json
 Task:
 
 ```text
-Sort one bunch of grapes by color: place green grapes on the right and red grapes on the left.
+Pick and place the green grape bunch first, then the red grape bunch into the box.
 ```
 
 Episode 수와 Total frame 수는 Dataset마다 달라질 수 있으므로 다음 파일에서 확인한다.
@@ -837,23 +837,86 @@ uv run hf auth whoami
 
 # Local PC Dataset Conversion Quick Reference
 
-새로운 Teleoperation Dataset을 수집한 후 Local PC에서 실행한다.
+새로운 Teleoperation Dataset을 수집한 후 **Local PC (Ubuntu)**에서 실행한다.
 
-예를 들어 원본 데이터가 다음 위치에 있는 경우:
+이번 원본 데이터 경로:
 
 ```text
-~/rb5_teleop/dataset/1/
+~/rb5_teleop/dataset/2/
 ```
 
-Dataset 변환:
+### 1. Isaac-GR00T 폴더 이동 및 가상환경 활성화
 
 ```bash
 cd ~/Isaac-GR00T
 
+conda deactivate
+source ~/Isaac-GR00T/.venv/bin/activate
+```
+
+### 2. 원본 데이터셋 확인
+
+```bash
+ls ~/rb5_teleop/dataset/2
+```
+
+### 3. 언어 명령 설정 확인
+
+```bash
+grep -n -A 4 '^TASK =' convert_rb5_grape.py
+```
+
+`convert_rb5_grape.py`의 `TASK`는 다음과 같이 설정한다.
+
+```python
+TASK = (
+    "Pick and place the green grape bunch first, "
+    "then the red grape bunch into the box."
+)
+```
+
+### 4. Hugging Face 로그인 확인
+
+```bash
+hf auth whoami
+```
+
+### 5. 데이터셋 변환 및 Hugging Face 업로드
+
+```bash
 python convert_rb5_grape.py \
-  --dataset-id 1 \
+  --dataset-id 2 \
   --dataset-name rb5_grape_sort_v2
 ```
+
+> 동일한 Dataset 이름으로 재실행하면 변환 스크립트가 기존 로컬 출력 폴더를 덮어쓸 수 있으므로 주의한다.
+
+### 6. 변환 결과 확인
+
+```bash
+ls ~/Isaac-GR00T/demo_data/rb5_grape_sort_v2
+cat ~/Isaac-GR00T/demo_data/rb5_grape_sort_v2/meta/info.json
+cat ~/Isaac-GR00T/demo_data/rb5_grape_sort_v2/meta/tasks.jsonl
+ls -lh ~/Isaac-GR00T/demo_data/rb5_grape_sort_v2/meta/*stats*
+```
+
+이번 데이터셋의 확인된 메타데이터:
+
+```text
+LeRobot version : v2.1
+Robot type      : rb5_dg5f
+Episodes        : 17
+Frames          : 26549
+FPS             : 30
+State / Action  : 26 / 26
+Videos          : 34 (D435 + D405)
+```
+
+Hugging Face 업로드는 저장소 페이지에서 확인한다:
+
+https://huggingface.co/datasets/ganikim/rb5_grape_sort_v2
+
+> `hf repo-files ganikim/rb5_grape_sort_v2 --repo-type dataset`은 현재 설치된 CLI에서 파일 목록 조회 명령으로 지원되지 않는다.
 
 정상적으로 완료되면 다음 과정이 자동으로 수행된다.
 

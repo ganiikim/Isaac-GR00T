@@ -18,9 +18,13 @@ HF_USERNAME = "ganikim"
 
 FPS = 30.0
 
+# TASK = (
+#     "Sort one bunch of grapes by color: "
+#     "place green grapes on the right and red grapes on the left."
+# )
 TASK = (
-    "Sort one bunch of grapes by color: "
-    "place green grapes on the right and red grapes on the left."
+    "Pick and place the green grape bunch first, "
+    "then the red grape bunch into the box."
 )
 
 STATE_DIM = 26

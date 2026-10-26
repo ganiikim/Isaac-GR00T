@@ -163,7 +163,7 @@ uv run hf auth login
 
 Hugging Face Write Token을 입력한다.
 
-> Hugging Face Token은 GitHub repository나 문서에 저장하지 않는다.
+> Hugging Face Token이 없는 경우, Hugging Face → Settings → Access Tokens → Create new token에서 새로운 토큰을 생성한다.
 
 ---
 

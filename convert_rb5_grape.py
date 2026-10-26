@@ -160,6 +160,39 @@ def get_video_info(path):
     }
 
 
+def encode_h264_video(source_path, target_path, expected_frames):
+    """Encode a camera video for browser playback and verify frame alignment."""
+    command = [
+        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+        "-i", str(source_path),
+        "-map", "0:v:0", "-an", "-c:v", "libx264",
+        "-pix_fmt", "yuv420p", "-preset", "medium", "-crf", "18",
+        "-movflags", "+faststart", "-vsync", "0",
+        str(target_path),
+    ]
+    subprocess.run(command, check=True)
+    result = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "v:0",
+         "-show_entries", "stream=codec_name,nb_frames,avg_frame_rate",
+         "-of", "json", str(target_path)],
+        capture_output=True, text=True, check=True,
+    )
+    streams = json.loads(result.stdout).get("streams", [])
+    if not streams:
+        raise RuntimeError(f"No video stream in {target_path}")
+    stream = streams[0]
+    if stream.get("codec_name") != "h264":
+        raise RuntimeError(f"Unexpected codec in {target_path}: {stream}")
+    if int(stream.get("nb_frames", -1)) != expected_frames:
+        raise RuntimeError(
+            f"Frame count changed: {source_path} -> {target_path}: "
+            f"expected {expected_frames}, got {stream.get('nb_frames')}"
+        )
+    if stream.get("avg_frame_rate") != "30/1":
+        raise RuntimeError(f"Unexpected frame rate in {target_path}: {stream}")
+    print(f"  [H264] {target_path.name}: {expected_frames} frames, 30 fps")
+
+
 # ============================================================
 # Episode discovery
 # ============================================================
@@ -1146,16 +1179,16 @@ def main():
             f".mp4"
         )
 
-        shutil.copy2(
+        encode_h264_video(
             front_src,
-            front_dir
-            / video_name,
+            front_dir / video_name,
+            front_info["frames"],
         )
 
-        shutil.copy2(
+        encode_h264_video(
             second_src,
-            second_dir
-            / video_name,
+            second_dir / video_name,
+            second_info["frames"],
         )
 
         # ----------------------------------------------------
@@ -1388,7 +1421,7 @@ def main():
                         640,
 
                     "video.codec":
-                        "mpeg4",
+                        "h264",
 
                     "video.pix_fmt":
                         "yuv420p",
@@ -1433,7 +1466,7 @@ def main():
                         640,
 
                     "video.codec":
-                        "mpeg4",
+                        "h264",
 
                     "video.pix_fmt":
                         "yuv420p",
